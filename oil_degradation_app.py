@@ -1,4 +1,4 @@
-import streamlit as st
+﻿import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 from pathlib import Path
@@ -6,15 +6,15 @@ from datetime import datetime
 
 st.set_page_config(
     page_title="Oil Degradation Timeline",
-    page_icon="🔧",
+    page_icon="ðŸ”§",
     layout="wide"
 )
 
-st.title("🔧 Engine Oil Degradation Timeline")
+st.title("ðŸ”§ Engine Oil Degradation Timeline")
 st.markdown("Predict TAN rise and TBN depletion over engine operating hours using physics-based simulation.")
 st.divider()
 
-# ── Local export helpers ──
+# â”€â”€ Local export helpers â”€â”€
 EXPORT_DIR = Path("exports")
 EXPORT_DIR.mkdir(exist_ok=True)
 
@@ -24,31 +24,31 @@ def save_figure_html(fig, name):
     fig.write_html(str(path), include_plotlyjs="cdn", full_html=True)
     return path
 
-# ── Sidebar controls ──
-st.sidebar.header("⚙️ Engine Parameters")
+# â”€â”€ Sidebar controls â”€â”€
+st.sidebar.header("âš™ï¸ Engine Parameters")
 
 oil_type = st.sidebar.selectbox(
     "Oil Type",
     ["Mineral Oil", "Semi-Synthetic", "Synthetic Oil"]
 )
 
-avg_temp = st.sidebar.slider("Average Oil Temperature (°C)", 60, 130, 85, 1)
+avg_temp = st.sidebar.slider("Average Oil Temperature (Â°C)", 60, 130, 85, 1)
 avg_rpm  = st.sidebar.slider("Average Engine RPM", 500, 2000, 900, 50)
 max_hours = st.sidebar.slider("Simulation Duration (hours)", 100, 1000, 500, 50)
 
 st.sidebar.divider()
-st.sidebar.header("📏 Thresholds")
+st.sidebar.header("ðŸ“ Thresholds")
 tan_thresh = st.sidebar.slider("TAN Change Threshold (mg KOH/g)", 1.0, 4.0, 2.0, 0.1)
 tbn_thresh = st.sidebar.slider("TBN Change Threshold (mg KOH/g)", 1.0, 5.0, 3.0, 0.1)
 
-# ── Oil parameters ──
+# â”€â”€ Oil parameters â”€â”€
 oil_params = {
     "Mineral Oil":     {"tan_rate": 0.010, "tbn_rate": 0.020, "base_tan": 0.30, "base_tbn": 10.0},
     "Semi-Synthetic":  {"tan_rate": 0.008, "tbn_rate": 0.016, "base_tan": 0.25, "base_tbn": 11.0},
     "Synthetic Oil":   {"tan_rate": 0.006, "tbn_rate": 0.012, "base_tan": 0.20, "base_tbn": 12.0},
 }
 
-# ── Compute curves ──
+# â”€â”€ Compute curves â”€â”€
 def compute_curves(oil_type, temp, rpm, max_hrs):
     p = oil_params[oil_type]
     temp_factor = 1 + (temp - 85) * 0.012
@@ -70,7 +70,7 @@ def find_change_hour(hours, tan, tbn, tan_th, tbn_th):
 hours, tan, tbn = compute_curves(oil_type, avg_temp, avg_rpm, max_hours)
 change_hr, tan_at_change, tbn_at_change = find_change_hour(hours, tan, tbn, tan_thresh, tbn_thresh)
 
-# ── Metric cards ──
+# â”€â”€ Metric cards â”€â”€
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
@@ -83,24 +83,24 @@ with col2:
     if tan_at_change:
         st.metric("TAN at Change", f"{tan_at_change:.3f} mg KOH/g")
     else:
-        st.metric("TAN at Change", "—")
+        st.metric("TAN at Change", "â€”")
 
 with col3:
     if tbn_at_change:
         st.metric("TBN at Change", f"{tbn_at_change:.3f} mg KOH/g")
     else:
-        st.metric("TBN at Change", "—")
+        st.metric("TBN at Change", "â€”")
 
 with col4:
     if change_hr:
-        status = "🟢 Good" if change_hr > (max_hours * 0.5) else "🟡 Monitor"
+        status = "ðŸŸ¢ Good" if change_hr > (max_hours * 0.5) else "ðŸŸ¡ Monitor"
     else:
-        status = "🟢 Good"
+        status = "ðŸŸ¢ Good"
     st.metric("Current Status", status)
 
 st.divider()
 
-# ── Main plot ──
+# â”€â”€ Main plot â”€â”€
 fig = go.Figure()
 
 # TAN curve
@@ -148,7 +148,7 @@ if change_hr:
 
 fig.update_layout(
     title=dict(
-        text=f"Oil Degradation Timeline — {oil_type} @ {avg_temp}°C, {avg_rpm} RPM",
+        text=f"Oil Degradation Timeline â€” {oil_type} @ {avg_temp}Â°C, {avg_rpm} RPM",
         font=dict(size=16)
     ),
     xaxis_title="Operating Hours",
@@ -166,6 +166,7 @@ fig.update_xaxes(gridcolor="#f0f0f0")
 fig.update_yaxes(gridcolor="#f0f0f0")
 
 st.plotly_chart(fig, use_container_width=True)
+st.caption("Tip: use the buttons below each chart to save a local HTML copy of the visualization.")
 
 save_col1, save_col2 = st.columns(2)
 with save_col1:
@@ -180,9 +181,9 @@ with save_col2:
         mime="text/html",
     )
 
-# ── Compare all oil types ──
+# â”€â”€ Compare all oil types â”€â”€
 st.divider()
-st.subheader("📊 Compare All Oil Types")
+st.subheader("ðŸ“Š Compare All Oil Types")
 
 fig2 = go.Figure()
 colors = {"Mineral Oil": ("#E24B4A", "#2980B9"),
@@ -191,14 +192,14 @@ colors = {"Mineral Oil": ("#E24B4A", "#2980B9"),
 
 for ot, (tc, tnc) in colors.items():
     h, t, tn = compute_curves(ot, avg_temp, avg_rpm, max_hours)
-    fig2.add_trace(go.Scatter(x=h, y=t,  name=f"TAN — {ot}", line=dict(color=tc, width=2), hovertemplate=f"{ot} TAN: %{{y:.3f}}<extra></extra>"))
-    fig2.add_trace(go.Scatter(x=h, y=tn, name=f"TBN — {ot}", line=dict(color=tnc, width=2, dash="dash"), hovertemplate=f"{ot} TBN: %{{y:.3f}}<extra></extra>"))
+    fig2.add_trace(go.Scatter(x=h, y=t,  name=f"TAN â€” {ot}", line=dict(color=tc, width=2), hovertemplate=f"{ot} TAN: %{{y:.3f}}<extra></extra>"))
+    fig2.add_trace(go.Scatter(x=h, y=tn, name=f"TBN â€” {ot}", line=dict(color=tnc, width=2, dash="dash"), hovertemplate=f"{ot} TBN: %{{y:.3f}}<extra></extra>"))
 
 fig2.add_hline(y=tan_thresh, line_dash="dot", line_color="gray", line_width=1)
 fig2.add_hline(y=tbn_thresh, line_dash="dot", line_color="gray", line_width=1)
 
 fig2.update_layout(
-    title="All Oil Types — TAN & TBN Comparison",
+    title="All Oil Types â€” TAN & TBN Comparison",
     xaxis_title="Operating Hours",
     yaxis_title="mg KOH/g",
     yaxis=dict(range=[0, 13]),
@@ -212,6 +213,7 @@ fig2.update_xaxes(gridcolor="#f0f0f0")
 fig2.update_yaxes(gridcolor="#f0f0f0")
 
 st.plotly_chart(fig2, use_container_width=True)
+st.caption("The comparison chart helps you explain how oil formulation changes the degradation curve.")
 
 save_col3, save_col4 = st.columns(2)
 with save_col3:
@@ -226,9 +228,9 @@ with save_col4:
         mime="text/html",
     )
 
-# ── Change interval table ──
+# â”€â”€ Change interval table â”€â”€
 st.divider()
-st.subheader("🔁 Recommended Change Intervals")
+st.subheader("ðŸ” Recommended Change Intervals")
 
 table_data = []
 interval_hours = []
@@ -242,15 +244,15 @@ for ot in ["Mineral Oil", "Semi-Synthetic", "Synthetic Oil"]:
     table_data.append({
         "Oil Type": ot,
         "Change Interval (hrs)": f"{ch:.0f}" if ch else ">"+str(max_hours),
-        "TAN at Change": f"{tac:.3f}" if tac else "—",
-        "TBN at Change": f"{tnac:.3f}" if tnac else "—",
-        "Triggered By": "TAN" if (tac and tac >= tan_thresh) else ("TBN" if tnac else "—")
+        "TAN at Change": f"{tac:.3f}" if tac else "â€”",
+        "TBN at Change": f"{tnac:.3f}" if tnac else "â€”",
+        "Triggered By": "TAN" if (tac and tac >= tan_thresh) else ("TBN" if tnac else "â€”")
     })
 
 import pandas as pd
 st.dataframe(pd.DataFrame(table_data), use_container_width=True, hide_index=True)
 
-st.subheader("📈 Time to Threshold by Oil Type")
+st.subheader("ðŸ“ˆ Time to Threshold by Oil Type")
 interval_df = pd.DataFrame(interval_hours)
 fig3 = go.Figure()
 fig3.add_trace(go.Bar(
@@ -270,6 +272,7 @@ fig3.update_layout(
 )
 fig3.update_yaxes(gridcolor="#f0f0f0")
 st.plotly_chart(fig3, use_container_width=True)
+st.caption("This chart turns the change interval into an easy interview-friendly summary.")
 
 save_col5, save_col6 = st.columns(2)
 with save_col5:
@@ -286,3 +289,4 @@ with save_col6:
 
 st.divider()
 st.caption("Physics-based simulation | TAN/TBN Prediction Project | March 2026")
+
